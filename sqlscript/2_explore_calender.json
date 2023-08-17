@@ -1,0 +1,20 @@
+{
+	"name": "2_explore_calender",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "----Query data using bulk abfss\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net/nyc_green_taxi_data/raw/calendar.csv',\n        FORMAT = 'CSV',\n--         PARSER_VERSION = '2.0',\n        FIRSTROW = 2,\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    )\n    WITH (\n        dateKey VARCHAR(50) 2,\n        date  VARCHAR(50) 1, \n        year  VARCHAR(50) 3, \n        month VARCHAR(50) 4\n    )\n     AS [result]\n     \n\n---Access data using external data source\nSELECT\n   *\nFROM\n    OPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/calendar.csv',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        -- FIRSTROW = 2,\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    )\n    -- WITH (\n    --     dateKey VARCHAR(50) 2,\n    --     date  VARCHAR(50) 1, \n    --     year  VARCHAR(50) 3, \n    --     month VARCHAR(50) 4\n    -- )\n     AS [result]\n\n\n----Stored Procedure to find datatype \n\nEXEC sp_describe_first_result_set N'SELECT * \n    FROM OPENROWSET(\n        BULK ''nyc_green_taxi_data/raw/calendar.csv'',\n        DATA_SOURCE = ''nyc_taxi_data'',\n        FORMAT = ''CSV'',\n        PARSER_VERSION = ''2.0'',\n        HEADER_ROW = TRUE\n    ) AS [calendar]'\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

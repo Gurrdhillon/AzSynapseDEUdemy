@@ -1,0 +1,20 @@
+{
+	"name": "5_payment_type",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "--Selecting data from a file with a commma\n-- SELECT \n-- CAST(JSON_VALUE(jsonDoc, '$.payment_type') AS SMALLINT) payment_type,\n-- CAST(JSON_VALUE(jsonDoc, '$.payment_type_desc') AS VARCHAR(100)) payment_type_desc\n-- FROM \n-- OPENROWSET(\n--         BULK 'nyc_green_taxi_data/raw/payment_type.json',\n--         DATA_SOURCE = 'nyc_taxi_data',\n--         FORMAT = 'CSV',\n--         PARSER_VERSION = '1.0',\n--         HEADER_ROW = TRUE,\n--         FIELDTERMINATOR = '0x0b'   ,    --0x0b for vertical tab\n--         FIELDQUOTE = '0x0b'\n--         -- ROWTERMINATOR = '\\n'\n--     )\n--     WITH \n--     (\n--         jsonDoc NVARCHAR(MAX)\n--     )\n--      AS payment_type\n\n\n-----using OpenJson function\nSELECT * \nFROM \nOPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/payment_type.json',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '1.0',\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = '0x0b'   ,    --0x0b for vertical tab\n        FIELDQUOTE = '0x0b'\n        -- ROWTERMINATOR = '\\n'\n    )\n    WITH \n    (\n        jsonDoc NVARCHAR(MAX)\n    )\n     AS payment_type\n     CROSS APPLY OPENJSON(jsonDoc);\n\n\n---Reading data from the json with array file\n---------------------------------------------------------------------------------------------------\n--In this query I read data from json file with an nested array, \n--I opened nested array again using OPENJSON function by specifying the JSON value holder\n-- variable name,\n--I also renamed the value varible to payment_type_desc_value, \n-- writing new name [datatype] <original_name_path> (for example in this one I did, \n-- payment_type_desc_value NVARCHAR(MAX) '$.value') \nSELECT payment_type, payment_type_desc_value\nFROM \nOPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/payment_type_array.json',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '1.0',\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = '0x0b'   ,    --0x0b for vertical tab\n        FIELDQUOTE = '0x0b'\n        -- ROWTERMINATOR = '\\n'\n    )\n    WITH \n    (\n        jsonDoc NVARCHAR(MAX)\n    )\n     AS payment_type\n     CROSS APPLY OPENJSON(jsonDoc)\n     WITH \n     (\n        payment_type SMALLINT,\n        payment_type_desc NVARCHAR(MAX) AS JSON\n     ) CROSS APPLY OPENJSON(payment_type_desc)\n     WITH \n     (\n       payment_type_desc_value NVARCHAR(MAX) '$.value'\n     )\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

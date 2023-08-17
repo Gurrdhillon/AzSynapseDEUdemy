@@ -1,0 +1,20 @@
+{
+	"name": "1_exolore_taxi_zone",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://synapsecoursedlg.dfs.core.windows.net/nyc-taxidata/nyc_green_taxi_data/raw/taxi_zone.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) AS [result]\n\n\n----Query data using bulk abfss\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net/nyc_green_taxi_data/raw/taxi_zone.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) AS [result]\n\n\nSELECT name, collation_name FROM sys.databases\n\n--Creating an external data source using https protocol \nCREATE EXTERNAL DATA SOURCE nyc_taxi_data\nWITH (\n    LOCATION = 'https://synapsecoursedlg.dfs.core.windows.net/nyc-taxi-data'\n)\n\n--Creating an external data source using https abfss\nCREATE EXTERNAL DATA SOURCE nyc_taxi_data\nWITH (\n    LOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net/'\n)\n\n\n-- Using external data source instead of file link\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK '/nyc_green_taxi_data/raw/taxi_zone.csv',\n        DATA_SOURCE  = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        -- HEADER_ROW = TRUE,\n        FIRSTROW = 2,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    )\n    WITH (\n        locationId SMALLINT 1,\n        borough VARCHAR(15) 2,\n        zone VARCHAR(50) 3,\n        service_zone VARCHAR(15) 4\n    ) AS [result]\n\n\n---Drop/Delete External Data Source\nDROP EXTERNAL DATA SOURCE nyc_taxi_data\n\n---TO find out where data source is pointig to \nSELECT name, location FROM sys.external_data_sources\n\n\n\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
