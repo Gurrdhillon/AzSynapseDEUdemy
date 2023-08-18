@@ -1,0 +1,20 @@
+{
+	"name": "7_exolore_trip_data_green_csv",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/trip_data_green_csv/year=2020/month=01/green_tripdata_2020-01.csv',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n-----To select the data from all the file in a folder, \n--proivided that files got same format, you can just specify folder name and it will select all the files in the folder,\n--you can also use Regex, lets say you want just csv files, then you can put <*.csv> after folder name\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/trip_data_green_csv/year=2020/month=01',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n---To get data from subfolder, you can put ** (two stars) after folder name to select the data\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/trip_data_green_csv/**',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n--Get data from some specofic subfolders, you can do it by specifying those folders\n--using BULK variable\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK ('nyc_green_taxi_data/raw/trip_data_green_csv/year=2020/month=01',\n        'nyc_green_taxi_data/raw/trip_data_green_csv/year=2020/month=02'),\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n--Use more than 1 wildcard character to get data from subfolder and specifivc type files\nSELECT\n    TOP 100 ,\n\nFROM\n    OPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/trip_data_green_csv/year=2020/month=*/*.csv',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n--The above query doesn't tell anything about whihc file data came from, we can use some metadata fx for that\n--function filename()\nSELECT\n    TOP 100 \n    result.filename() AS file_name,  -- this will only show the filename\n    result.*      --this will show the data too, it this is missing, no data will be shown\n\nFROM\n    OPENROWSET(\n        BULK 'nyc_green_taxi_data/raw/trip_data_green_csv/year=2020/month=*/*.csv',\n        DATA_SOURCE = 'nyc_taxi_data',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
