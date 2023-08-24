@@ -1,0 +1,20 @@
+{
+	"name": "5_assignment_create_table_Calender",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "-- IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n-- \tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n-- \tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n-- \t       FORMAT_OPTIONS (\n-- \t\t\t FIELD_TERMINATOR = ',',\n-- \t\t\t FIRST_ROW = 11,\n-- \t\t\t USE_TYPE_DEFAULT = FALSE\n-- \t\t\t))\n-- GO\n\n-- IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyc-taxidata_synapsecoursedlg_dfs_core_windows_net') \n-- \tCREATE EXTERNAL DATA SOURCE [nyc-taxidata_synapsecoursedlg_dfs_core_windows_net] \n-- \tWITH (\n-- \t\tLOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net' \n-- \t)\n-- GO\n\nCREATE EXTERNAL TABLE bronze.calender (\n\t[date_key] bigint,\n\t[date] date,\n\t[year] bigint,\n\t[month] bigint,\n\t[day] bigint,\n\t[day_name] nvarchar(100),\n\t[day_of_year] bigint,\n\t[week_of_month] bigint,\n\t[week_of_year] bigint,\n\t[month_name] nvarchar(100),\n\t[year_month] bigint,\n\t[year_week] bigint\n\t)\n\tWITH (\n\tLOCATION = '/raw/calendar.csv',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = csv_file_format\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.calender\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

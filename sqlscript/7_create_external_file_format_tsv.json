@@ -1,0 +1,20 @@
+{
+	"name": "7_create_external_file_format_tsv",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n-- Create an external file format for DELIMITED (CSV/TSV) files.\nDROP EXTERNAL FILE FORMAT tsv_file_format\nGO\n\nCREATE EXTERNAL FILE FORMAT tsv_file_format\nWITH (\n        FORMAT_TYPE = DELIMITEDTEXT\n     , FORMAT_OPTIONS (     \n      FIELD_TERMINATOR = '\\t'\n    , STRING_DELIMITER = '\"'\n    , FIRST_ROW = 2 -- ONLY AVAILABLE FOR AZURE SYNAPSE ANALYTICS\n    , USE_TYPE_DEFAULT =  FALSE\n    , ENCODING = 'UTF8'\n    , PARSER_VERSION = '2.0'\n    )\n     );\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

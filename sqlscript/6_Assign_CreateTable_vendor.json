@@ -1,0 +1,20 @@
+{
+	"name": "6_Assign_CreateTable_vendor",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "CREATE EXTERNAL TABLE bronze.vendor (\n    VENDOR_ID   INT ,\n    VENDOR_NAME VARCHAR(100)\n\t)\n\tWITH (\n\tLOCATION = '/raw/vendor.csv',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = csv_file_format\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.vendor\nGO\n\n\n------Create external table for tripType.csv\n------Just a note, \n----If you make trip_type_desc data VARCHAR(10), it wont process any data\n-- if you put reject_value params, then all the rows with trip_type_desc will be saved in rejected folder\nIF OBJECT_ID('bronze.trip_type') IS NOT NULL\n    DROP EXTERNAL TABLE bronze.trip_type\nCREATE EXTERNAL TABLE bronze.trip_type (\n    trip_type INT,\n    trip_type_desc VARCHAR(50)\n\t)\n\tWITH (\n\tLOCATION = '/raw/trip_type.tsv',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = tsv_file_format,\n    ------- Lets add rejected file folder\n    REJECT_VALUE = 10,\n    REJECTED_ROW_LOCATION = 'rejection/trip_type'\n\n\n\t);\nGO\n\n\nSELECT  * FROM bronze.trip_type\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

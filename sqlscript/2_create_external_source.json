@@ -2,7 +2,7 @@
 	"name": "2_create_external_source",
 	"properties": {
 		"folder": {
-			"name": "nyc_taxi/ldw"
+			"name": "nyc_taxi/ldw (logical data warehouse)"
 		},
 		"content": {
 			"query": "USE nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL DATA SOURCE nyc_taxi_src\nWITH\n  (  LOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net/nyc_green_taxi_data' \n\n  )\n; ",

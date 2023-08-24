@@ -1,0 +1,20 @@
+{
+	"name": "8_create_external_table_trip_data",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = ',',\n\t\t\t FIRST_ROW = 2,\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyc-taxidata_synapsecoursedlg_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [nyc-taxidata_synapsecoursedlg_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net' \n\t)\nGO\n\nDROP EXTERNAL TABLE bronze.trip_data\nGO\n\nCREATE EXTERNAL TABLE bronze.trip_data (\n\t[VendorID] bigint,\n\t[lpep_pickup_datetime] datetime2(0),\n\t[lpep_dropoff_datetime] datetime2(0),\n\t[store_and_fwd_flag] nvarchar(400),\n\t[RatecodeID] bigint,\n\t[PULocationID] bigint,\n\t[DOLocationID] bigint,\n\t[passenger_count] bigint,\n\t[trip_distance] float,\n\t[fare_amount] float,\n\t[extra] float,\n\t[mta_tax] float,\n\t[tip_amount] float,\n\t[tolls_amount] float,\n\t[ehail_fee] nvarchar(400),\n\t[improvement_surcharge] float,\n\t[total_amount] float,\n\t[payment_type] bigint,\n\t[trip_type] bigint,\n\t[congestion_surcharge] float\n\t)\n\tWITH (\n\tLOCATION = '/raw/trip_data_green_csv/**',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = csv_file_format\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.trip_data\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

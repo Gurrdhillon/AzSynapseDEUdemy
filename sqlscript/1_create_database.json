@@ -2,10 +2,10 @@
 	"name": "1_create_database",
 	"properties": {
 		"folder": {
-			"name": "nyc_taxi/ldw"
+			"name": "nyc_taxi/ldw (logical data warehouse)"
 		},
 		"content": {
-			"query": "USE master\nGO\n\n--WHEN we create a database, we should be using master database, thats why on very first line,  \n-- I switched to master database\nCREATE DATABASE nyc_taxi_ldw\nGO\n\nALTER DATABASE nyc_taxi_ldw COLLATE Latin1_General_100_BIN2_UTF8\nGO\n\n\nUSE nyc_taxi_ldw\nGO\n\nCREATE SCHEMA broze\nGO\n\nCREATE SCHEMA silver\nGO\n\nCREATE SCHEMA gold\nGO",
+			"query": "USE master\nGO\n\n--WHEN we create a database, we should be using master database, thats why on very first line,  \n-- I switched to master database\nCREATE DATABASE nyc_taxi_ldw\nGO\n\nALTER DATABASE nyc_taxi_ldw COLLATE Latin1_General_100_BIN2_UTF8\nGO\n\n\nUSE nyc_taxi_ldw\nGO\n\nCREATE SCHEMA bronze\nGO\n\nDROP SCHEMA broze\nGO\n\nCREATE SCHEMA silver\nGO\n\nCREATE SCHEMA gold\nGO",
 			"metadata": {
 				"language": "sql"
 			},

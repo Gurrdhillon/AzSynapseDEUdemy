@@ -2,10 +2,10 @@
 	"name": "4_create_external_table",
 	"properties": {
 		"folder": {
-			"name": "nyc_taxi/ldw"
+			"name": "nyc_taxi/ldw (logical data warehouse)"
 		},
 		"content": {
-			"query": "USe nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL TABLE broze.taxi_zone\n    ( \n        location_id SMALLINT , \n        borough VARCHAR(15) ,\n        zone VARCHAR(50) ,\n        service_zone VARCHAR(15)\n     )\n    WITH (\n        LOCATION = '/raw/taxi_zone.csv',\n        DATA_SOURCE = nyc_taxi_src,\n        FILE_FORMAT = csv_file_format\n    )\n    ;",
+			"query": "USe nyc_taxi_ldw\nGO\n\nDROP EXTERNAL TABLE broze.taxi_zone\n\nCREATE EXTERNAL TABLE bronze.taxi_zone\n    ( \n        location_id SMALLINT , \n        borough VARCHAR(15) ,\n        zone VARCHAR(50) ,\n        service_zone VARCHAR(15)\n     )\n    WITH (\n        LOCATION = '/raw/taxi_zone.csv',\n        DATA_SOURCE = nyc_taxi_src,\n        FILE_FORMAT = csv_file_format\n    )\n    ;\n\nSELECT * FROM bronze.taxi_zone;\n\n\n",
 			"metadata": {
 				"language": "sql"
 			},
