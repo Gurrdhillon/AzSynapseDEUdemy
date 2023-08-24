@@ -139,10 +139,10 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"folder": {
-					"name": "nyc_taxi/ldw"
+					"name": "nyc_taxi/ldw (logical data warehouse)"
 				},
 				"content": {
-					"query": "USE master\nGO\n\n--WHEN we create a database, we should be using master database, thats why on very first line,  \n-- I switched to master database\nCREATE DATABASE nyc_taxi_ldw\nGO\n\nALTER DATABASE nyc_taxi_ldw COLLATE Latin1_General_100_BIN2_UTF8\nGO\n\n\nUSE nyc_taxi_ldw\nGO\n\nCREATE SCHEMA broze\nGO\n\nCREATE SCHEMA silver\nGO\n\nCREATE SCHEMA gold\nGO",
+					"query": "USE master\nGO\n\n--WHEN we create a database, we should be using master database, thats why on very first line,  \n-- I switched to master database\nCREATE DATABASE nyc_taxi_ldw\nGO\n\nALTER DATABASE nyc_taxi_ldw COLLATE Latin1_General_100_BIN2_UTF8\nGO\n\n\nUSE nyc_taxi_ldw\nGO\n\nCREATE SCHEMA bronze\nGO\n\nDROP SCHEMA broze\nGO\n\nCREATE SCHEMA silver\nGO\n\nCREATE SCHEMA gold\nGO",
 					"metadata": {
 						"language": "sql"
 					},
@@ -185,7 +185,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"folder": {
-					"name": "nyc_taxi/ldw"
+					"name": "nyc_taxi/ldw (logical data warehouse)"
 				},
 				"content": {
 					"query": "USE nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL DATA SOURCE nyc_taxi_src\nWITH\n  (  LOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net/nyc_green_taxi_data' \n\n  )\n; ",
@@ -231,7 +231,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"folder": {
-					"name": "nyc_taxi/ldw"
+					"name": "nyc_taxi/ldw (logical data warehouse)"
 				},
 				"content": {
 					"query": "USE nyc_taxi_ldw\nGO\n\n-- Create an external file format for DELIMITED (CSV/TSV) files.\nCREATE EXTERNAL FILE FORMAT csv_file_format\nWITH (\n        FORMAT_TYPE = DELIMITEDTEXT\n     , FORMAT_OPTIONS (     \n      FIELD_TERMINATOR = ','\n    , STRING_DELIMITER = '\"'\n    , FIRST_ROW = 2 -- ONLY AVAILABLE FOR AZURE SYNAPSE ANALYTICS\n    , USE_TYPE_DEFAULT =  FALSE\n    , ENCODING = 'UTF8'\n    , PARSER_VERSION = '2.0'\n    )\n     );",
@@ -277,10 +277,10 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"folder": {
-					"name": "nyc_taxi/ldw"
+					"name": "nyc_taxi/ldw (logical data warehouse)"
 				},
 				"content": {
-					"query": "USe nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL TABLE broze.taxi_zone\n    ( \n        location_id SMALLINT , \n        borough VARCHAR(15) ,\n        zone VARCHAR(50) ,\n        service_zone VARCHAR(15)\n     )\n    WITH (\n        LOCATION = '/raw/taxi_zone.csv',\n        DATA_SOURCE = nyc_taxi_src,\n        FILE_FORMAT = csv_file_format\n    )\n    ;",
+					"query": "USe nyc_taxi_ldw\nGO\n\nDROP EXTERNAL TABLE broze.taxi_zone\n\nCREATE EXTERNAL TABLE bronze.taxi_zone\n    ( \n        location_id SMALLINT , \n        borough VARCHAR(15) ,\n        zone VARCHAR(50) ,\n        service_zone VARCHAR(15)\n     )\n    WITH (\n        LOCATION = '/raw/taxi_zone.csv',\n        DATA_SOURCE = nyc_taxi_src,\n        FILE_FORMAT = csv_file_format\n    )\n    ;\n\nSELECT * FROM bronze.taxi_zone;\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -318,6 +318,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/5_assignment_create_table_Calender')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw (logical data warehouse)"
+				},
+				"content": {
+					"query": "-- IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n-- \tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n-- \tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n-- \t       FORMAT_OPTIONS (\n-- \t\t\t FIELD_TERMINATOR = ',',\n-- \t\t\t FIRST_ROW = 11,\n-- \t\t\t USE_TYPE_DEFAULT = FALSE\n-- \t\t\t))\n-- GO\n\n-- IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyc-taxidata_synapsecoursedlg_dfs_core_windows_net') \n-- \tCREATE EXTERNAL DATA SOURCE [nyc-taxidata_synapsecoursedlg_dfs_core_windows_net] \n-- \tWITH (\n-- \t\tLOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net' \n-- \t)\n-- GO\n\nCREATE EXTERNAL TABLE bronze.calender (\n\t[date_key] bigint,\n\t[date] date,\n\t[year] bigint,\n\t[month] bigint,\n\t[day] bigint,\n\t[day_name] nvarchar(100),\n\t[day_of_year] bigint,\n\t[week_of_month] bigint,\n\t[week_of_year] bigint,\n\t[month_name] nvarchar(100),\n\t[year_month] bigint,\n\t[year_week] bigint\n\t)\n\tWITH (\n\tLOCATION = '/raw/calendar.csv',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = csv_file_format\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.calender\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/5_payment_type')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -332,6 +355,29 @@
 					},
 					"currentConnection": {
 						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/6_Assign_CreateTable_vendor')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw (logical data warehouse)"
+				},
+				"content": {
+					"query": "CREATE EXTERNAL TABLE bronze.vendor (\n    VENDOR_ID   INT ,\n    VENDOR_NAME VARCHAR(100)\n\t)\n\tWITH (\n\tLOCATION = '/raw/vendor.csv',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = csv_file_format\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.vendor\nGO\n\n\n------Create external table for tripType.csv\n------Just a note, \n----If you make trip_type_desc data VARCHAR(10), it wont process any data\n-- if you put reject_value params, then all the rows with trip_type_desc will be saved in rejected folder\nIF OBJECT_ID('bronze.trip_type') IS NOT NULL\n    DROP EXTERNAL TABLE bronze.trip_type\nCREATE EXTERNAL TABLE bronze.trip_type (\n    trip_type INT,\n    trip_type_desc VARCHAR(50)\n\t)\n\tWITH (\n\tLOCATION = '/raw/trip_type.tsv',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = tsv_file_format,\n    ------- Lets add rejected file folder\n    REJECT_VALUE = 10,\n    REJECTED_ROW_LOCATION = 'rejection/trip_type'\n\n\n\t);\nGO\n\n\nSELECT  * FROM bronze.trip_type\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
@@ -364,6 +410,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/7_create_external_file_format_tsv')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw (logical data warehouse)"
+				},
+				"content": {
+					"query": "USE nyc_taxi_ldw\nGO\n\n-- Create an external file format for DELIMITED (CSV/TSV) files.\nDROP EXTERNAL FILE FORMAT tsv_file_format\nGO\n\nCREATE EXTERNAL FILE FORMAT tsv_file_format\nWITH (\n        FORMAT_TYPE = DELIMITEDTEXT\n     , FORMAT_OPTIONS (     \n      FIELD_TERMINATOR = '\\t'\n    , STRING_DELIMITER = '\"'\n    , FIRST_ROW = 2 -- ONLY AVAILABLE FOR AZURE SYNAPSE ANALYTICS\n    , USE_TYPE_DEFAULT =  FALSE\n    , ENCODING = 'UTF8'\n    , PARSER_VERSION = '2.0'\n    )\n     );\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/7_exolore_trip_data_green_csv')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -378,6 +447,29 @@
 					},
 					"currentConnection": {
 						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/8_create_external_table_trip_data')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw (logical data warehouse)"
+				},
+				"content": {
+					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = ',',\n\t\t\t FIRST_ROW = 2,\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyc-taxidata_synapsecoursedlg_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [nyc-taxidata_synapsecoursedlg_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://nyc-taxidata@synapsecoursedlg.dfs.core.windows.net' \n\t)\nGO\n\nDROP EXTERNAL TABLE bronze.trip_data\nGO\n\nCREATE EXTERNAL TABLE bronze.trip_data (\n\t[VendorID] bigint,\n\t[lpep_pickup_datetime] datetime2(0),\n\t[lpep_dropoff_datetime] datetime2(0),\n\t[store_and_fwd_flag] nvarchar(400),\n\t[RatecodeID] bigint,\n\t[PULocationID] bigint,\n\t[DOLocationID] bigint,\n\t[passenger_count] bigint,\n\t[trip_distance] float,\n\t[fare_amount] float,\n\t[extra] float,\n\t[mta_tax] float,\n\t[tip_amount] float,\n\t[tolls_amount] float,\n\t[ehail_fee] nvarchar(400),\n\t[improvement_surcharge] float,\n\t[total_amount] float,\n\t[payment_type] bigint,\n\t[trip_type] bigint,\n\t[congestion_surcharge] float\n\t)\n\tWITH (\n\tLOCATION = '/raw/trip_data_green_csv/**',\n\tDATA_SOURCE = nyc_taxi_src,\n\tFILE_FORMAT = csv_file_format\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.trip_data\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
@@ -447,26 +539,6 @@
 					},
 					"currentConnection": {
 						"databaseName": "demo",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "SELECT TOP (100) [location_id]\n,[borough]\n,[zone]\n,[service_zone]\n FROM [broze].[taxi_zone]",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
