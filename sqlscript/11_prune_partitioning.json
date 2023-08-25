@@ -1,0 +1,20 @@
+{
+	"name": "11_prune_partitioning",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\nDROP VIEW IF EXISTS bronze.vw_trip_data\nGO\nCREATE VIEW bronze.vw_trip_data AS  \nSELECT trip_data.filepath(1) AS Year, --FilePath is taking the very first thing from the filepath\n        trip_data.filepath(2) AS Month,  --Second thing in the filepath is month, so it is found by filepath(2)\n        trip_data.*\n    FROM   \n    OPENROWSET(\n        BULK 'raw/trip_data_green_parquet/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET',\n        HEADER_ROW = TRUE\n    )  AS [trip_data]\n    --  WHERE trip_data.filepath(1) = '2020'\n    --     -- AND trip_data.filepath(2) IN ('06','07','08')\n    -- GROUP BY trip_data.filepath(1), trip_data.filepath(2)\n    -- ORDER BY trip_data.filepath(1), trip_data.filepath(2)\n\n\nSELECT COUNT(*) FROM bronze.vw_trip_data;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
