@@ -1,0 +1,20 @@
+{
+	"name": "2_CETAS_calendar_csv_to_parquet",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/CETAS"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n\n\nCREATE EXTERNAL TABLE silver.CETAS_calendar\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/calendar',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.calender;\n\n\nSELECT * FROM silver.CETAS_calendar",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

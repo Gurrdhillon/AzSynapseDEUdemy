@@ -1,0 +1,20 @@
+{
+	"name": "6_CETAS_payment_type_json_to_parquet",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/CETAS"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL TABLE silver.CETAS_payment_type\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/payment_type',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM \nOPENROWSET(\n        BULK '/raw/payment_type.json',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '1.0',\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = '0x0b'   ,    --0x0b for vertical tab\n        FIELDQUOTE = '0x0b'\n        -- ROWTERMINATOR = '\\n'\n    )\n    WITH \n    (\n        jsonDoc NVARCHAR(MAX)\n    )\n     AS payment_type\n     CROSS APPLY OPENJSON(jsonDoc);\n\n\nSELECT * FROM silver.CETAS_payment_type\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

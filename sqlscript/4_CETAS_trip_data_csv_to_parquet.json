@@ -1,0 +1,20 @@
+{
+	"name": "4_CETAS_trip_data_csv_to_parquet",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/CETAS"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL TABLE silver.CETAS_trip_data\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/trip_data',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.trip_data;\n\n\nSELECT * FROM silver.CETAS_trip_data\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

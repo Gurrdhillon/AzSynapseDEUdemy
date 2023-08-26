@@ -1,0 +1,20 @@
+{
+	"name": "5_CETAS_rate_code_json_parquet",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/CETAS"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL TABLE silver.CETAS_rate_code\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/rate_code',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.vw_rate_code;\n\n\nSELECT * FROM silver.CETAS_rate_code\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

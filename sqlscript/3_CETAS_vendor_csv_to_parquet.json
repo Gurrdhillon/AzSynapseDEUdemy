@@ -1,0 +1,20 @@
+{
+	"name": "3_CETAS_vendor_csv_to_parquet",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/CETAS"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\n\nCREATE EXTERNAL TABLE silver.CETAS_vendor\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/vendor',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.vendor;\n\n\nSELECT * FROM silver.CETAS_vendor\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
