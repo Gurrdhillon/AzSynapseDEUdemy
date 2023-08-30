@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "synspe-course-ws"
 		},
+		"ls_serverless_sql_pool_nyc_taxi_ldw_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synspe-course-ws-ondemand.sql.azuresynapse.net,1433;Initial Catalog=nyc_taxi_ldw"
+		},
 		"synspe-course-ws-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synspe-course-ws.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
