@@ -30,6 +30,48 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/ds_taxi_zone')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_synpase_course_dl",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "nyc_green_taxi_data/silver/taxi_zone",
+						"fileSystem": "nyc-taxidata"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "location_id",
+						"type": "INT_16"
+					},
+					{
+						"name": "borough",
+						"type": "UTF8"
+					},
+					{
+						"name": "zone",
+						"type": "UTF8"
+					},
+					{
+						"name": "service_zone",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_synpase_course_dl')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/bing-covid-19-data')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
