@@ -26,6 +26,43 @@
 						"enablePartitionDiscovery": false
 					}
 				}
+			},
+			{
+				"name": "create taxi zone in silver schema",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "delete_silver_taxi_zone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_serverless_sql_pool_nyc_taxi_ldw",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "IF OBJECT_ID('silver.CETAS_taxi_zone') IS NOT NULL\n\tDROP EXTERNAL TABLE silver.CETAS_taxi_zone;"
+						},
+						{
+							"type": "Query",
+							"text": "CREATE EXTERNAL TABLE silver.CETAS_taxi_zone\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/taxi_zone',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.taxi_zone;"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"annotations": []
