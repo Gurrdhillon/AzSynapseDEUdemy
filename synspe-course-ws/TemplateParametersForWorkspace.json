@@ -11,6 +11,9 @@
 		"bing-covid-19-data_sasUri": {
 			"value": ""
 		},
+		"ls_synpase_course_dl_properties_typeProperties_url": {
+			"value": "https://synapsecoursedlg.dfs.core.windows.net/"
+		},
 		"synspe-course-ws-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://synapsecoursedlg.dfs.core.windows.net"
 		}
