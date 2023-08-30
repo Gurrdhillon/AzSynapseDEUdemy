@@ -1,0 +1,20 @@
+{
+	"name": "gold_final_view",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\nDROP VIEW IF EXISTS gold.vw_trip_data\nGO\nCREATE VIEW gold.vw_trip_data AS  \nSELECT trip_data.filepath(1) AS year, --FilePath is taking the very first thing from the filepath\n        trip_data.filepath(2) AS month,  --Second thing in the filepath is month, so it is found by filepath(2)\n        trip_data.*\n    FROM   \n    OPENROWSET(\n        BULK 'gold/trip_data_green/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET'\n        -- ,HEADER_ROW = TRUE\n    ) \n    WITH \n    (\n        borough VARCHAR(50),\n        trip_day VARCHAR(50),\n        trip_date VARCHAR(MAX),\n        weekend_trip NVARCHAR(MAX),\n        card_trips_count INT, \n        cash_trips_count INT\n    ) AS [trip_data]\n    \n    --  WHERE trip_data.filepath(1) = '2020'\n    --     -- AND trip_data.filepath(2) IN ('06','07','08')\n    -- GROUP BY trip_data.filepath(1), trip_data.filepath(2)\n    -- ORDER BY trip_data.filepath(1), trip_data.filepath(2)\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

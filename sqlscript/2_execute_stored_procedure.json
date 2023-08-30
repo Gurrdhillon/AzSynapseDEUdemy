@@ -1,0 +1,20 @@
+{
+	"name": "2_execute_stored_procedure",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/StoredProcedure"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\nEXEC silver.usp_silver_trip_data '2020', '01'\n\n-- CREATE EXTERNAL TABLE silver.trip_data_green2020_01 WITH ( DATA_SOURCE = nyc_taxi_src, LOCATION = 'silver/trip_data_green/year=2020/month=01', FILE_FORMAT = parquet_file_format ) \n-- AS SELECT * FROM bronze.vw_trip_data WHERE year = '2020' AND month = '01'\n\n\n-- DROP EXTERNAL TABLE silver.trip_data_green2020_01\n\n\nEXEC gold.usp_gold_trip_data '2020', '01'\nEXEC gold.usp_gold_trip_data '2020', '02'\nEXEC gold.usp_gold_trip_data '2020', '03'\nEXEC gold.usp_gold_trip_data '2020', '04'\nEXEC gold.usp_gold_trip_data '2020', '05'\nEXEC gold.usp_gold_trip_data '2020', '06'\nEXEC gold.usp_gold_trip_data '2020', '07'\nEXEC gold.usp_gold_trip_data '2020', '08'\nEXEC gold.usp_gold_trip_data '2020', '09'\nEXEC gold.usp_gold_trip_data '2020', '10'\nEXEC gold.usp_gold_trip_data '2020', '11'\nEXEC gold.usp_gold_trip_data '2020', '12\n'EXEC gold.usp_gold_trip_data '2021','01'\nEXEC gold.usp_gold_trip_data '2021', '02'\nEXEC gold.usp_gold_trip_data '2021', '03'\nEXEC gold.usp_gold_trip_data '2021', '04'\nEXEC gold.usp_gold_trip_data '2021', '05'\nEXEC gold.usp_gold_trip_data '2021', '06'\nEXEC gold.usp_gold_trip_data '2021', '07'\nEXEC gold.usp_gold_trip_data '2021', '08'\nEXEC gold.usp_gold_trip_data '2021', '09'\nEXEC gold.usp_gold_trip_data '2021', '10'\nEXEC gold.usp_gold_trip_data '2021', '11'\nEXEC gold.usp_gold_trip_data '2021', '12'",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
