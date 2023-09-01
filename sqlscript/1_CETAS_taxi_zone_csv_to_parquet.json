@@ -5,7 +5,7 @@
 			"name": "nyc_taxi/CETAS"
 		},
 		"content": {
-			"query": "USE nyc_taxi_ldw\nGO\n\n-- IF OBJECT_ID('silver.CETAS_taxi_zone') IS NOT NULL\n-- \tDROP EXTERNAL TABLE bronze.taxi_zone;\n\nCREATE EXTERNAL TABLE silver.CETAS_taxi_zone\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/taxi_zone',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.taxi_zone;\n\n\nSELECT * FROM silver.CETAS_taxi_zone",
+			"query": "USE nyc_taxi_ldw\nGO\n\n-- IF OBJECT_ID('silver.CETAS_taxi_zone') IS NOT NULL\n-- \tDROP EXTERNAL TABLE silver.taxi_zone;\n\nCREATE EXTERNAL TABLE silver.CETAS_taxi_zone\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/taxi_zone',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.taxi_zone;\n\n\nSELECT * FROM silver.CETAS_taxi_zone",
 			"metadata": {
 				"language": "sql"
 			},
