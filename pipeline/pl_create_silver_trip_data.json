@@ -124,6 +124,47 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "script_vw_silver_trip_data_green",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "ForEach Year and Month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_serverless_sql_pool_nyc_taxi_ldw",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "USE nyc_taxi_ldw;"
+						},
+						{
+							"type": "Query",
+							"text": "DROP VIEW IF EXISTS silver.vw_trip_data;"
+						},
+						{
+							"type": "Query",
+							"text": "CREATE VIEW silver.vw_trip_data AS  \nSELECT trip_data.filepath(1) AS year, --FilePath is taking the very first thing from the filepath\n        trip_data.filepath(2) AS month,  --Second thing in the filepath is month, so it is found by filepath(2)\n        trip_data.*\n    FROM   \n    OPENROWSET(\n        BULK 'silver/trip_data_green/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET'\n        -- ,HEADER_ROW = TRUE\n    )\n    WITH \n    (\n    [VendorID] int,\n\t[lpep_pickup_datetime] datetime2(7),\n\t[lpep_dropoff_datetime] datetime2(7),\n\t[store_and_fwd_flag] CHAR(1),\n\t[RatecodeID] int,\n\t[PULocationID] int,\n\t[DOLocationID] int,\n\t[passenger_count] int,\n\t[trip_distance] float,\n\t[fare_amount] float,\n\t[extra] float,\n\t[mta_tax] float,\n\t[tip_amount] float,\n\t[tolls_amount] float,\n\t[ehail_fee] int,\n\t[improvement_surcharge] float,\n\t[total_amount] float,\n\t[payment_type] int,\n\t[trip_type] int,\n\t[congestion_surcharge] float\n    )  \n    AS [trip_data]"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"annotations": []
