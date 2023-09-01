@@ -877,6 +877,52 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/15_silver_view_trip_data')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw (logical data warehouse)"
+				},
+				"content": {
+					"query": "USE nyc_taxi_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_trip_data\nGO\n\nCREATE VIEW silver.vw_trip_data AS  \nSELECT trip_data.filepath(1) AS year, --FilePath is taking the very first thing from the filepath\n        trip_data.filepath(2) AS month,  --Second thing in the filepath is month, so it is found by filepath(2)\n        trip_data.*\n    FROM   \n    OPENROWSET(\n        BULK 'silver/trip_data_green/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET'\n        -- ,HEADER_ROW = TRUE\n    )\n    WITH \n    (\n    [VendorID] int,\n\t[lpep_pickup_datetime] datetime2(7),\n\t[lpep_dropoff_datetime] datetime2(7),\n\t[store_and_fwd_flag] CHAR(1),\n\t[RatecodeID] int,\n\t[PULocationID] int,\n\t[DOLocationID] int,\n\t[passenger_count] int,\n\t[trip_distance] float,\n\t[fare_amount] float,\n\t[extra] float,\n\t[mta_tax] float,\n\t[tip_amount] float,\n\t[tolls_amount] float,\n\t[ehail_fee] int,\n\t[improvement_surcharge] float,\n\t[total_amount] float,\n\t[payment_type] int,\n\t[trip_type] int,\n\t[congestion_surcharge] float\n    )  \n    AS [trip_data]\n\n\nSELECT TOP 100 * FROM silver.vw_trip_data;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/16_gold_final_view')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw (logical data warehouse)"
+				},
+				"content": {
+					"query": "USE nyc_taxi_ldw\nGO\n\nDROP VIEW IF EXISTS gold.vw_trip_data\nGO\nCREATE VIEW gold.vw_trip_data AS  \nSELECT trip_data.filepath(1) AS year, --FilePath is taking the very first thing from the filepath\n        trip_data.filepath(2) AS month,  --Second thing in the filepath is month, so it is found by filepath(2)\n        trip_data.*\n    FROM   \n    OPENROWSET(\n        BULK 'gold/trip_data_green/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET'\n        -- ,HEADER_ROW = TRUE\n    ) \n    WITH \n    (\n        borough VARCHAR(50),\n        trip_day VARCHAR(50),\n        trip_date VARCHAR(MAX),\n        weekend_trip NVARCHAR(MAX),\n        card_trips_count INT, \n        cash_trips_count INT\n    ) AS [trip_data]\n    \n    --  WHERE trip_data.filepath(1) = '2020'\n    --     -- AND trip_data.filepath(2) IN ('06','07','08')\n    -- GROUP BY trip_data.filepath(1), trip_data.filepath(2)\n    -- ORDER BY trip_data.filepath(1), trip_data.filepath(2)\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/1_CETAS_taxi_zone_csv_to_parquet')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -1559,29 +1605,6 @@
 					},
 					"currentConnection": {
 						"databaseName": "nyc_taxi_discovery",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/gold_final_view')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "nyc_taxi/ldw (logical data warehouse)"
-				},
-				"content": {
-					"query": "USE nyc_taxi_ldw\nGO\n\nDROP VIEW IF EXISTS gold.vw_trip_data\nGO\nCREATE VIEW gold.vw_trip_data AS  \nSELECT trip_data.filepath(1) AS year, --FilePath is taking the very first thing from the filepath\n        trip_data.filepath(2) AS month,  --Second thing in the filepath is month, so it is found by filepath(2)\n        trip_data.*\n    FROM   \n    OPENROWSET(\n        BULK 'gold/trip_data_green/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET'\n        -- ,HEADER_ROW = TRUE\n    ) \n    WITH \n    (\n        borough VARCHAR(50),\n        trip_day VARCHAR(50),\n        trip_date VARCHAR(MAX),\n        weekend_trip NVARCHAR(MAX),\n        card_trips_count INT, \n        cash_trips_count INT\n    ) AS [trip_data]\n    \n    --  WHERE trip_data.filepath(1) = '2020'\n    --     -- AND trip_data.filepath(2) IN ('06','07','08')\n    -- GROUP BY trip_data.filepath(1), trip_data.filepath(2)\n    -- ORDER BY trip_data.filepath(1), trip_data.filepath(2)\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
