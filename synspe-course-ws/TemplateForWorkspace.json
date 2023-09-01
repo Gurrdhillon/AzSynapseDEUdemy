@@ -381,7 +381,7 @@
 					"name": "nyc_taxi/CETAS"
 				},
 				"content": {
-					"query": "USE nyc_taxi_ldw\nGO\n\n-- IF OBJECT_ID('silver.CETAS_taxi_zone') IS NOT NULL\n-- \tDROP EXTERNAL TABLE bronze.taxi_zone;\n\nCREATE EXTERNAL TABLE silver.CETAS_taxi_zone\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/taxi_zone',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.taxi_zone;\n\n\nSELECT * FROM silver.CETAS_taxi_zone",
+					"query": "USE nyc_taxi_ldw\nGO\n\n-- IF OBJECT_ID('silver.CETAS_taxi_zone') IS NOT NULL\n-- \tDROP EXTERNAL TABLE silver.taxi_zone;\n\nCREATE EXTERNAL TABLE silver.CETAS_taxi_zone\n\tWITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = 'silver/taxi_zone',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\nAS\nSELECT * \nFROM bronze.taxi_zone;\n\n\nSELECT * FROM silver.CETAS_taxi_zone",
 					"metadata": {
 						"language": "sql"
 					},
@@ -709,6 +709,30 @@
 					},
 					"currentConnection": {
 						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4_usp_taxi_zone_CE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Create External Table for Taxi Zone using Stored Procedure",
+				"folder": {
+					"name": "nyc_taxi/StoredProcedure"
+				},
+				"content": {
+					"query": "USE nyc_taxi_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_silver_trip_data\n@year VARCHAR(4),\n@month VARCHAR(2)\nAS\nBEGIN \n\n-----Creating a SQL\n    DECLARE @create_sql  NVARCHAR(MAX),\n            @drop_sql   NVARCHAR(MAX);\n\n    SET @create_sql = \n    'CREATE EXTERNAL TABLE silver.trip_data_green_' + @year + '_' + @month + \n\t' WITH \n\t(\n\t\tDATA_SOURCE = nyc_taxi_src,\n\t\tLOCATION = ''silver/trip_data_green/year=' + @year + '/month=' + @month + ''',\n\t\tFILE_FORMAT = parquet_file_format\n\t)\n    AS\n    SELECT * \n    FROM bronze.vw_trip_data\n    WHERE year = ''' + @year + '''\n    AND month = ''' + @month + '''\n    '\n    print(@create_sql)\n\n    EXEC sp_executesql @create_sql;\n\n    SET @drop_sql = \n    ' DROP EXTERNAL TABLE silver.trip_data_green_' + @year + '_' + @month;\n\n    EXEC sp_executesql @drop_sql;\n\nEND\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
