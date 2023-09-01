@@ -1,0 +1,80 @@
+{
+	"name": "pla-create_silver_taxi_zone_with_procedure_with_parameter",
+	"properties": {
+		"description": "Creating a stored procedure with parameters",
+		"activities": [
+			{
+				"name": "delete_silver_taxi_zone",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_nyc_taxi_data_dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_folder_path": {
+								"value": "@variables('v_folder_path')",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "usp_taxi_zone",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "delete_silver_taxi_zone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": {
+						"value": "@variables('v_usp_name')",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_serverless_sql_pool_nyc_taxi_ldw",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"v_folder_path": {
+				"type": "String",
+				"defaultValue": "nyc_green_taxi_data/silver/taxi_zone"
+			},
+			"v_usp_name": {
+				"type": "String",
+				"defaultValue": "silver.usp_silver_taxi_zone"
+			}
+		},
+		"annotations": []
+	}
+}

@@ -1,6 +1,7 @@
 {
 	"name": "ds_nyc_taxi_data_dynamic",
 	"properties": {
+		"description": "I can use parameters to get a specific file in the nyc_taxi_data folder",
 		"linkedServiceName": {
 			"referenceName": "ls_synpase_course_dl",
 			"type": "LinkedServiceReference"
@@ -23,6 +24,23 @@
 			},
 			"compressionCodec": "snappy"
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "location_id",
+				"type": "INT_16"
+			},
+			{
+				"name": "borough",
+				"type": "UTF8"
+			},
+			{
+				"name": "zone",
+				"type": "UTF8"
+			},
+			{
+				"name": "service_zone",
+				"type": "UTF8"
+			}
+		]
 	}
 }
