@@ -1,0 +1,20 @@
+{
+	"name": "14_Execute_taxi_zone_usp",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/ldw (logical data warehouse)"
+		},
+		"content": {
+			"query": "USE nyc_taxi_ldw\nGO\n\nEXECUTE silver.usp_silver_taxi_zone;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
